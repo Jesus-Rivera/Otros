@@ -1,67 +1,75 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include "pila.h"
 
+char agrupacion_entrada[3] = {'(','{','['};
+char agrupacion_salida[3] = {')','}',']'};
+char operadores[5] = {'+','-','*','/','^'};
 
-typedef struct pila
+int size(char* cadena)
 {
-	char digito;
-	struct pila *anterior;
-}pila;
-
-pila* ultimo = NULL;
-
-void push (char digito)
-{
-	pila *elemento = (pila*)malloc(sizeof(pila));
-	elemento -> digito = digito;
-	if (ultimo == NULL)
-	{
-		ultimo = elemento;
-		ultimo -> anterior = NULL;
-	}
-	else{
-		elemento -> anterior = ultimo;
-		ultimo = elemento;
-	}
+	int i = 0;
+	while(cadena[i] != '\0')
+		i++;
+	return i;
 }
 
-char pop ()
+bool in(char caracter, char* cadena)
 {
-	pila* auxiliar;
-	auxiliar = ultimo;
-	ultimo = auxiliar -> anterior;
-	return auxiliar -> digito;
+	int i, tam = size(cadena); 
+	for(i = 0; i < tam; i ++)
+		if(caracter == cadena[i])
+			return true;
+	return false;
 }
 
-void mostrar ()
+char* infija_to_postfija(char* infija, int tam)
 {
-	pila *auxiliar = ultimo;
-	while(auxiliar != NULL)
+	char* postfia = (char*)malloc(sizeof(char)*(tam + 1));
+	int i,j = 0;
+	char aux, elemento;
+	for (i = 0; i < tam; i++)
 	{
-		printf("Valor: %c\n", auxiliar -> digito);
-		auxiliar = auxiliar-> anterior;
+		aux = infija[i];
+		if(aux == '(' ||  aux == '[' ||  aux == '{')
+		{
+			push(aux);
+		}
+		else if(aux == ')' || aux == ']' || aux == '}')
+		{
+			elemento = ultimo -> digito;
+			while(elemento != '(' ||  elemento == '[' ||  elemento == '{')
+			{
+				postfia[j] = pop();
+				j ++;
+				elemento = ultimo -> digito;
+			}
+			elemento = pop();
+		}
+		else if(in(aux,operadores))
+		{
+			push(aux);
+		}
+		else
+		{
+			postfia[j] = infija[i];
+			j++;
+		}
 	}
+	while(ultimo != NULL)
+	{
+		postfia[j] = pop();
+		j++;
+	}
+	return postfia;
 }
 
 int main(int argc, char const *argv[])
 {
-	printf("Hola mundo\n");
-	push('H');
-	push('O');
-	push('L');
-	push('A');
-	push(' ');
-	push('M');
-	push('U');
-	push('N');
-	push('D');
-	push('O');
-	mostrar();
-	printf("Este elemento salio de la pila %c\n",pop());
-	printf("La nueva pila es: \n");
-	mostrar();
+	char *infija = (char*)malloc(sizeof(char)*100);
+	scanf("%[^\n]",infija);
+	int tam = size(infija);
+	printf("La cadena en postfija es: %s\n",infija_to_postfija(infija,tam));
 	return 0;
 }
-
-
-
